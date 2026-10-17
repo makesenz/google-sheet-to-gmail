@@ -1,0 +1,137 @@
+{
+  "name": "Google Sheets to Gmail",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "5d4424a4-4849-4b43-acc9-8ee4e20a970f",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1PIIvp88_hQja7OYH_3C3d-BHYq0g65OlNIejoNj8dXA",
+          "mode": "list",
+          "cachedResultName": "Untitled spreadsheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1PIIvp88_hQja7OYH_3C3d-BHYq0g65OlNIejoNj8dXA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1PIIvp88_hQja7OYH_3C3d-BHYq0g65OlNIejoNj8dXA/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "050682c2-0e52-459c-b417-2636b1ff0ff1",
+      "name": "Google Sheets - Get Row(s)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        224,
+        0
+      ],
+      "alwaysOutputData": false,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "xW1cP33sPFoU22jc",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst BRAND = '#70B800';\nconst DARK_GREEN = '#4D8200';\nconst LIGHT_GREEN = '#F2F9E8';\n\nconst LOGO_URL = 'https://maawellness.in/wp-content/uploads/2026/10/Asset-2.svg';\n\n// Read all student rows from Google Sheets.\nconst rows = $input.all();\n\n// Create one separate email for each student with a valid email address.\nreturn rows\n  .filter(item => {\n    const email = String(item.json.email || '').trim();\n    const name = String(item.json.name || '').trim();\n\n    // Skip empty spreadsheet rows or rows without an email address.\n    return email.includes('@') && name.length > 0;\n  })\n  .map(item => {\n    const student = item.json;\n\n    const name = String(student.name || 'Student').trim();\n    const course = String(student.course || 'N/A').trim();\n    const score = Number(student['course score'] || 0);\n    const status = String(student.status || 'Pending').trim();\n\n    const statusColor =\n      status.toLowerCase() === 'passed' ? DARK_GREEN : '#D93025';\n\n    const statusBackground =\n      status.toLowerCase() === 'passed' ? LIGHT_GREEN : '#FDECEC';\n\n    const subject = `Your ${course} Course Report - makeSenz`;\n\n    const message = `\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>${subject}</title>\n</head>\n<body style=\"margin:0;padding:0;background:#f4f7f1;font-family:Arial,Helvetica,sans-serif;color:#263322;\">\n\n  <div style=\"display:none;max-height:0;overflow:hidden;opacity:0;\">\n    Your ${course} course report is ready. Check your score and result.\n  </div>\n\n  <table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" style=\"background:#f4f7f1;padding:24px 10px;\">\n    <tr>\n      <td align=\"center\">\n\n        <table role=\"presentation\" width=\"600\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" style=\"width:100%;max-width:600px;background:#ffffff;border-radius:18px;overflow:hidden;\">\n\n          <tr>\n            <td align=\"center\" style=\"background:${BRAND};padding:30px 20px 26px;\">\n\n              <div style=\"display:inline-block;background:#ffffff;border-radius:14px;padding:12px 18px;margin:0 auto 16px;\">\n                <img src=\"${LOGO_URL}\" alt=\"makeSenz Logo\" width=\"150\" style=\"display:block;width:150px;max-width:100%;height:auto;border:0;\">\n              </div>\n\n              <h1 style=\"margin:0;color:#ffffff;font-size:25px;line-height:1.3;\">\n                Course Performance Report\n              </h1>\n\n              <p style=\"margin:9px 0 0;color:#ffffff;font-size:14px;line-height:1.6;\">\n                Your learning progress at a glance\n              </p>\n\n            </td>\n          </tr>\n\n          <tr>\n            <td style=\"padding:30px 26px;\">\n\n              <p style=\"margin:0 0 14px;font-size:16px;line-height:1.7;\">\n                Hi <strong>${name}</strong>,\n              </p>\n\n              <p style=\"margin:0 0 24px;font-size:15px;line-height:1.8;color:#53604d;\">\n                Thank you for being part of the makeSenz learning journey.\n                Here is your course performance report.\n              </p>\n\n              <table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" style=\"border:1px solid #e5ecdE;border-radius:12px;overflow:hidden;\">\n\n                <tr>\n                  <td colspan=\"2\" style=\"padding:16px 18px;background:${LIGHT_GREEN};font-size:17px;font-weight:bold;color:${DARK_GREEN};\">\n                    Your Results\n                  </td>\n                </tr>\n\n                <tr>\n                  <td style=\"padding:15px 18px;border-bottom:1px solid #edf0e9;font-size:14px;color:#687363;\">\n                    Student Name\n                  </td>\n                  <td align=\"right\" style=\"padding:15px 18px;border-bottom:1px solid #edf0e9;font-size:14px;font-weight:bold;color:#263322;\">\n                    ${name}\n                  </td>\n                </tr>\n\n                <tr>\n                  <td style=\"padding:15px 18px;border-bottom:1px solid #edf0e9;font-size:14px;color:#687363;\">\n                    Course\n                  </td>\n                  <td align=\"right\" style=\"padding:15px 18px;border-bottom:1px solid #edf0e9;font-size:14px;font-weight:bold;color:#263322;\">\n                    ${course}\n                  </td>\n                </tr>\n\n                <tr>\n                  <td style=\"padding:15px 18px;border-bottom:1px solid #edf0e9;font-size:14px;color:#687363;\">\n                    Course Score\n                  </td>\n                  <td align=\"right\" style=\"padding:15px 18px;border-bottom:1px solid #edf0e9;font-size:20px;font-weight:bold;color:${DARK_GREEN};\">\n                    ${Number.isFinite(score) ? score : 'N/A'}\n                  </td>\n                </tr>\n\n                <tr>\n                  <td style=\"padding:15px 18px;font-size:14px;color:#687363;\">\n                    Result\n                  </td>\n                  <td align=\"right\" style=\"padding:15px 18px;\">\n                    <span style=\"display:inline-block;background:${statusBackground};color:${statusColor};padding:7px 14px;border-radius:20px;font-size:13px;font-weight:bold;\">\n                      ${status}\n                    </span>\n                  </td>\n                </tr>\n\n              </table>\n\n              <div style=\"margin:24px 0 0;padding:18px;background:${LIGHT_GREEN};border-left:4px solid ${BRAND};border-radius:8px;\">\n                <p style=\"margin:0;font-size:14px;line-height:1.8;color:#46543c;\">\n                  Keep learning, keep practicing, and keep moving toward your goals.\n                  Every step forward counts!\n                </p>\n              </div>\n\n              <p style=\"margin:28px 0 0;font-size:15px;line-height:1.8;color:#46543c;\">\n                Thank you for being a part of the makeSenz learning journey.\n                Keep learning, keep growing!\n              </p>\n\n              <p style=\"margin:16px 0 0;font-size:15px;line-height:1.8;color:#263322;\">\n                Regards,<br>\n                <strong style=\"color:${DARK_GREEN};\">Team makeSenz</strong>\n              </p>\n\n            </td>\n          </tr>\n\n          <tr>\n            <td align=\"center\" style=\"padding:17px 20px;background:#f8faf5;border-top:1px solid #e8eee1;\">\n              <p style=\"margin:0;font-size:12px;line-height:1.7;color:#788270;\">\n                makeSenz · Learn, grow, and achieve\n              </p>\n            </td>\n          </tr>\n\n        </table>\n\n      </td>\n    </tr>\n  </table>\n\n</body>\n</html>`;\n\n    return {\n      json: {\n        to: String(student.email).trim(),\n        subject,\n        message\n      }\n    };\n  });\n"
+      },
+      "id": "219cb7d4-e2ab-437f-a5f2-e4f0060ae8a9",
+      "name": "Format Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.to }}",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.message }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "79132994-709d-46e9-9b92-88e8ec5fd958",
+      "name": "Gmail - Send Message",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        704,
+        0
+      ],
+      "webhookId": "a966a033-da0e-4ca3-afe6-d961bcc79057",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "P967nzmDIkE7tIiR",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets - Get Row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets - Get Row(s)": {
+      "main": [
+        [
+          {
+            "node": "Format Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Email": {
+      "main": [
+        [
+          {
+            "node": "Gmail - Send Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "ff9f492f-f16d-4785-8c5c-ea26c780787d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b20310fc6c44fa8f8cca17d88a1574d769ebc00246774e949be77201f9979016"
+  },
+  "nodeGroups": [],
+  "id": "ny539rfqFm8SQ0oE",
+  "tags": []
+}
